@@ -1,0 +1,12 @@
+[package]
+name = "engine"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "watch-engine"
+path = "src/main.rs"
+
+[dependencies]
+watch_core = { path = "../core-engine" }
+clap = { version = "4", features = ["derive"] }

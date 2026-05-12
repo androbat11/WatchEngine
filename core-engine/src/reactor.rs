@@ -2,7 +2,7 @@ use crate::event::{EventHandler, FileEvent};
 use std::sync::mpsc::Receiver;
 
 
-struct Reactor<H: EventHandler> {
+pub struct Reactor<H: EventHandler> {
     receiver: Receiver<FileEvent>,
     handler: H
 }
