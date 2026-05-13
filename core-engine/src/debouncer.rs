@@ -29,7 +29,7 @@ debouncer.put(String::from("foo"));
 debouncer.put(String::from("bar"));
 sleep(delay);
 */
-struct Debouncer {
+pub struct Debouncer {
     timeout: Duration,
     // Instant takes the current "time"
     last_seen: HashMap<PathBuf, Instant>

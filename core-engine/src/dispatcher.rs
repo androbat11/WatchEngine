@@ -1,15 +1,21 @@
 use std::process::Command;
+use std::time::Duration;
 
-use crate::{event::FileEvent, registry::Registry};
+use crate::{debouncer::Debouncer, event::{EventHandler, FileEvent}, registry::Registry};
 
-struct Dispatcher {
+pub struct Dispatcher {
     registry: Registry,
-    exec: Option<String>
+    exec: Option<String>,
+    debouncer: Debouncer,
 }
 
 impl Dispatcher {
-    pub fn new(registry: Registry, exec: Option<String>) -> Self {
-        Dispatcher { registry, exec }
+    pub fn new(registry: Registry, exec: Option<String>, debounce_ms: u64) -> Self {
+        Dispatcher {
+            registry,
+            exec,
+            debouncer: Debouncer::new(Duration::from_millis(debounce_ms)),
+        }
     }
 
     pub fn dispatch(&self, event: &FileEvent){
@@ -28,6 +34,15 @@ impl Dispatcher {
                      .arg(cmd)
                      .spawn()
                      .ok(); // non-blocking: start and move on
+        }
+    }
+}
+
+impl EventHandler for Dispatcher {
+    fn handle(&mut self, event: &FileEvent) {
+        if self.debouncer.is_time_out(&event.path) {
+            self.debouncer.record(event.path.clone());
+            self.dispatch(event);
         }
     }
 }

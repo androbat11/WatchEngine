@@ -1,25 +1,44 @@
-use clap::{Parser, ValueEnum};
+use clap::Parser;
+use watch_core::config::Config;
+use std::path::PathBuf;
 
-// cargo run -p engine -- --language typescript
-#[derive(Debug, Clone, ValueEnum)]
-pub enum Language {
-    Typescript,
-    Javascript,
-}
-
-/// Watches filesystem events, filters them by language or path rules, and triggers pluggable handlers
+/// Lightweight file watcher
 #[derive(Debug, Parser)]
-#[command(name = "Watch-engine", version)]
+#[command(name = "watch-engine", version)]
 pub struct Args {
-    /// Name of the programming language to watch
-    #[arg(short, long)]
-    pub language: Language,
-    #[arg(short, long)]
-    pub recursive: bool
+    /// Directory to watch
+    #[arg(long)]
+    pub watch: PathBuf,
+
+    /// Watch TypeScript files (.ts, .tsx)
+    #[arg(long)]
+    pub typescript: bool,
+
+    /// Watch JavaScript files (.js, .mjs, .cjs)
+    #[arg(long)]
+    pub javascript: bool,
+
+    /// Debounce window in milliseconds
+    #[arg(long, default_value = "300")]
+    pub debounce: u64,
+
+    /// Shell command to run after each change
+    #[arg(long)]
+    pub exec: Option<String>,
 }
 
 impl Args {
     pub fn new() -> Self {
         Args::parse()
+    }
+}
+
+impl From<Args> for Config {
+    fn from(args: Args) -> Self {
+        Config {
+            root: args.watch,
+            debounce_ms: args.debounce,
+            plugins: Vec::new(),
+        }
     }
 }
